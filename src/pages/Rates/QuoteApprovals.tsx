@@ -213,7 +213,8 @@ export default function QuoteApprovals() {
     });
   const clearSel = () => setSelected(new Set());
   const allOnPageIds = filtered.map((q) => q.id);
-  const allSelectedOnPage = allOnPageIds.every((id) => selected.has(id)) && allOnPageIds.length > 0;
+  const allSelectedOnPage =
+    allOnPageIds.every((id) => selected.has(id)) && allOnPageIds.length > 0;
   const toggleSelectAll = () =>
     setSelected((prev) => {
       const next = new Set(prev);
@@ -237,7 +238,9 @@ export default function QuoteApprovals() {
 
   const rejectMany = (ids: string[], remarks: string) =>
     setQuotes((prev) =>
-      prev.map((x) => (ids.includes(x.id) ? { ...x, status: "Rejected", remarks } : x))
+      prev.map((x) =>
+        ids.includes(x.id) ? { ...x, status: "Rejected", remarks } : x
+      )
     );
 
   /* --------- drawer helpers ---------- */
@@ -277,7 +280,8 @@ export default function QuoteApprovals() {
     setModalRemarks("");
   };
   const confirmModal = () => {
-    if (modalKind === "approve") approveMany(modalIds, modalRemarks || undefined);
+    if (modalKind === "approve")
+      approveMany(modalIds, modalRemarks || undefined);
     if (modalKind === "reject") {
       const r = modalRemarks.trim();
       if (!r) return; // simple guard; could add toast
@@ -292,9 +296,12 @@ export default function QuoteApprovals() {
       {/* Header */}
       <div className="rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 p-4 text-white sm:p-5">
         <div className="text-xs/5 opacity-90">Rates ▸ Quote Approvals</div>
-        <div className="mt-1 text-lg font-semibold sm:text-xl">Quote Approvals</div>
+        <div className="mt-1 text-lg font-semibold sm:text-xl">
+          Quote Approvals
+        </div>
         <div className="mt-1 text-sm opacity-95">
-          Review quotes awaiting approval. Approve/Reject individually or in bulk.
+          Review quotes awaiting approval. Approve/Reject individually or in
+          bulk.
         </div>
       </div>
 
@@ -306,12 +313,17 @@ export default function QuoteApprovals() {
             <Input
               placeholder="Quote #, Customer, Origin/Destination…"
               value={query}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setQuery(e.target.value)
+              }
             />
           </div>
           <div>
             <Label>Direction</Label>
-            <Select value={direction} onChange={(e) => setDirection(e.target.value as Direction | "")}>
+            <Select
+              value={direction}
+              onChange={(e) => setDirection(e.target.value as Direction | "")}
+            >
               <option value="">All</option>
               <option>Export</option>
               <option>Import</option>
@@ -319,7 +331,10 @@ export default function QuoteApprovals() {
           </div>
           <div>
             <Label>Service</Label>
-            <Select value={service} onChange={(e) => setService(e.target.value as Service | "")}>
+            <Select
+              value={service}
+              onChange={(e) => setService(e.target.value as Service | "")}
+            >
               <option value="">All</option>
               <option>FCL</option>
               <option>LCL</option>
@@ -330,7 +345,10 @@ export default function QuoteApprovals() {
             <button
               className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
               onClick={() => {
-                setQuery(""); setDirection(""); setService(""); clearSel();
+                setQuery("");
+                setDirection("");
+                setService("");
+                clearSel();
               }}
             >
               Reset
@@ -374,7 +392,10 @@ export default function QuoteApprovals() {
           {filtered.map((qte) => {
             const checked = selected.has(qte.id);
             return (
-              <div key={qte.id} className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+              <div
+                key={qte.id}
+                className="rounded-xl border border-gray-200 p-4 dark:border-gray-800"
+              >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   {/* Left */}
                   <div className="flex items-start gap-3">
@@ -387,17 +408,20 @@ export default function QuoteApprovals() {
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
-                          {qte.id} · {qte.direction} {qte.service} • {qte.container}
+                          {qte.id} · {qte.direction} {qte.service} •{" "}
+                          {qte.container}
                         </div>
                         <Badge size="sm" color={statusColor(qte.status) as any}>
                           {qte.status}
                         </Badge>
                       </div>
                       <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                        {qte.originCode} – {qte.originName} → {qte.destinationCode} – {qte.destinationName}
+                        {qte.originCode} – {qte.originName} →{" "}
+                        {qte.destinationCode} – {qte.destinationName}
                       </div>
                       <div className="mt-1 text-xs text-gray-600 dark:text-gray-300">
-                        Customer: <b>{qte.customer}</b> · Valid till <b>{qte.validity}</b>
+                        Customer: <b>{qte.customer}</b> · Valid till{" "}
+                        <b>{qte.validity}</b>
                       </div>
                     </div>
                   </div>
@@ -405,7 +429,9 @@ export default function QuoteApprovals() {
                   {/* Right */}
                   <div className="flex flex-col items-start gap-2 md:items-end">
                     <div className="text-right">
-                      <div className="text-xs font-semibold text-sky-700 dark:text-sky-400">Offer Price</div>
+                      <div className="text-xs font-semibold text-sky-700 dark:text-sky-400">
+                        Offer Price
+                      </div>
                       <div className="text-lg font-bold text-gray-900 dark:text-white">
                         {inr(qte.priceINR)}
                       </div>
@@ -444,80 +470,159 @@ export default function QuoteApprovals() {
         </div>
       </Section>
 
-      {/* Drawer: View Quote */}
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-[9999]">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" onClick={closeDrawer} />
+          <div
+            className="fixed inset-0 z-[200000]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="qa-drawer-title"
+          >
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-[1px]"
+              onClick={closeDrawer}
+            />
+
+            {/* Drawer panel */}
             <div
               ref={panelRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Quote ${open.id}`}
               tabIndex={-1}
-              className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto bg-white p-5 shadow-2xl dark:bg-gray-900"
+              onClick={(e) => e.stopPropagation()}
+              className="
+          fixed right-0 inset-y-0 z-[200001]
+          w-full max-w-xl
+          bg-white shadow-2xl outline-none dark:bg-gray-900
+          flex flex-col
+        "
             >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-base font-semibold text-gray-800 dark:text-white/90">
-                  {open.id} · {open.direction} {open.service} • {open.container}
+              {/* HEADER */}
+              <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-5 pb-4 pt-5 text-white">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div
+                      id="qa-drawer-title"
+                      className="text-base font-semibold"
+                    >
+                      {open.id} · {open.direction} {open.service} •{" "}
+                      {open.container}
+                    </div>
+                    <div className="mt-0.5 text-[12px]/5 opacity-90">
+                      {open.originCode} – {open.originName} →{" "}
+                      {open.destinationCode} – {open.destinationName}
+                    </div>
+                  </div>
+
+                  <button
+                    className="rounded-lg border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur hover:bg-white/20"
+                    onClick={closeDrawer}
+                  >
+                    Close
+                  </button>
                 </div>
-                <button
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                  onClick={closeDrawer}
-                >
-                  Close
-                </button>
+
+                {/* quick chips */}
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Customer: {open.customer}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Validity: {open.validity}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Offer: {inr(open.priceINR)}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 ring-1 ring-white/30 ${
+                      open.status === "Approved" ||
+                      open.status === "Locked" ||
+                      open.status === "Sent"
+                        ? "bg-emerald-400/25"
+                        : open.status === "Rejected"
+                        ? "bg-rose-400/25"
+                        : "bg-amber-400/25"
+                    }`}
+                  >
+                    {open.status}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Created: {new Date(open.createdAt).toLocaleString()}
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              {/* BODY */}
+              <div className="flex-1 overflow-y-auto px-5 pb-24 pt-4">
                 {/* Route & Customer */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
-                  <div className="text-sm font-medium text-gray-800 dark:text-white/90">Route & Customer</div>
-                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {open.originCode} – {open.originName} → {open.destinationCode} – {open.destinationName}
+                <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+                  <div className="text-sm font-medium text-gray-800 dark:text-white/90">
+                    Route & Customer
                   </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <div>Customer: <b>{open.customer}</b></div>
-                    <div>Validity: <b>{open.validity}</b></div>
-                    <div>Status: <b>{open.status}</b></div>
-                    <div>Created: <b>{new Date(open.createdAt).toLocaleString()}</b></div>
+                  <div className="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+                    <div>
+                      Customer: <b>{open.customer}</b>
+                    </div>
+                    <div>
+                      Validity: <b>{open.validity}</b>
+                    </div>
+                    <div>
+                      Status: <b>{open.status}</b>
+                    </div>
+                    <div>
+                      Created:{" "}
+                      <b>{new Date(open.createdAt).toLocaleString()}</b>
+                    </div>
                   </div>
                 </div>
 
-                {/* Price & Breakup */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                {/* Offer & Breakup */}
+                <div className="mt-4 rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">Offer Price</div>
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">{inr(open.priceINR)}</div>
+                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      Offer Price
+                    </div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {inr(open.priceINR)}
+                    </div>
                   </div>
-                  <div className="text-sm font-medium text-gray-800 dark:text-white/90">Price Breakup</div>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="text-sm font-medium text-gray-800 dark:text-white/90">
+                    Price Breakup
+                  </div>
+                  <ul className="mt-2 divide-y divide-gray-100 text-sm text-gray-700 dark:divide-gray-800 dark:text-gray-300">
                     {open.charges.map((c) => (
-                      <li key={c.label} className="flex items-center justify-between">
+                      <li
+                        key={c.label}
+                        className="flex items-center justify-between py-1.5"
+                      >
                         <span>{c.label}</span>
-                        <span>{inr(c.amount)}</span>
+                        <span className="font-medium">{inr(c.amount)}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
+              </div>
 
-                {/* Actions inside drawer */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
-                  <div className="mb-2 text-sm font-medium text-gray-800 dark:text-white/90">Actions</div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
-                      onClick={() => openModal("approve", [open.id])}
-                    >
-                      Approve
-                    </button>
-                    <button
-                      className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700"
-                      onClick={() => openModal("reject", [open.id])}
-                    >
-                      Reject
-                    </button>
-                  </div>
+              {/* STICKY FOOTER ACTIONS */}
+              <div className="sticky bottom-0 left-0 right-0 border-t border-gray-200 bg-white/85 px-5 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-900/85">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    onClick={closeDrawer}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                    onClick={() => openModal("approve", [open.id])}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-medium text-white hover:bg-rose-700"
+                    onClick={() => openModal("reject", [open.id])}
+                  >
+                    Reject
+                  </button>
                 </div>
               </div>
             </div>
@@ -529,7 +634,10 @@ export default function QuoteApprovals() {
       {modalKind &&
         createPortal(
           <div className="fixed inset-0 z-[10000]">
-            <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={closeModal}
+            />
             <div
               role="dialog"
               aria-modal="true"
@@ -538,7 +646,9 @@ export default function QuoteApprovals() {
               <div className="mb-3 flex items-center justify-between">
                 <div className="text-base font-semibold text-gray-800 dark:text-white/90">
                   {modalKind === "approve" ? "Approve" : "Reject"}{" "}
-                  {modalIds.length > 1 ? `${modalIds.length} Quotes` : modalIds[0]}
+                  {modalIds.length > 1
+                    ? `${modalIds.length} Quotes`
+                    : modalIds[0]}
                 </div>
                 <button
                   className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
@@ -561,7 +671,11 @@ export default function QuoteApprovals() {
               <textarea
                 rows={4}
                 className="mt-3 w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-                placeholder={modalKind === "approve" ? "Remarks (optional)" : "Reason for rejection (required)"}
+                placeholder={
+                  modalKind === "approve"
+                    ? "Remarks (optional)"
+                    : "Reason for rejection (required)"
+                }
                 value={modalRemarks}
                 onChange={(e) => setModalRemarks(e.target.value)}
               />
@@ -578,7 +692,11 @@ export default function QuoteApprovals() {
                     modalKind === "approve"
                       ? "bg-emerald-600 hover:bg-emerald-700"
                       : "bg-rose-600 hover:bg-rose-700"
-                  } ${modalKind === "reject" && !modalRemarks.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${
+                    modalKind === "reject" && !modalRemarks.trim()
+                      ? "opacity-60 cursor-not-allowed"
+                      : ""
+                  }`}
                   onClick={confirmModal}
                   disabled={modalKind === "reject" && !modalRemarks.trim()}
                 >

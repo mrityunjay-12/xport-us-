@@ -417,45 +417,95 @@ export default function Quotes() {
         </div>
       </Section>
 
-      {/* Drawer */}
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-[9999]">
+          <div
+            className="fixed inset-0 z-[200000]"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quote-drawer-title"
+          >
+            {/* Backdrop */}
             <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-[1px]"
               onClick={() => setOpenId(null)}
             />
+
+            {/* Drawer panel */}
             <div
               ref={panelRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Quote ${open.id}`}
               tabIndex={-1}
-              className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto bg-white p-5 shadow-2xl dark:bg-gray-900"
+              onClick={(e) => e.stopPropagation()}
+              className="
+          fixed right-0 inset-y-0 z-[200001]
+          w-full max-w-xl
+          bg-white shadow-2xl outline-none dark:bg-gray-900
+          flex flex-col
+        "
             >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-base font-semibold text-gray-800 dark:text-white/90">
-                  {open.id} · {open.direction} {open.service} • {open.container}
+              {/* HEADER */}
+              <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-5 pb-4 pt-5 text-white">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div
+                      id="quote-drawer-title"
+                      className="text-base font-semibold"
+                    >
+                      {open.id} · {open.direction} {open.service} •{" "}
+                      {open.container}
+                    </div>
+                    <div className="mt-0.5 text-[12px]/5 opacity-90">
+                      {open.originCode} – {open.originName} →{" "}
+                      {open.destinationCode} – {open.destinationName}
+                    </div>
+                  </div>
+
+                  <button
+                    className="rounded-lg border border-white/30 bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur hover:bg-white/20"
+                    onClick={() => setOpenId(null)}
+                  >
+                    Close
+                  </button>
                 </div>
-                <button
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                  onClick={() => setOpenId(null)}
-                >
-                  Close
-                </button>
+
+                {/* quick chips */}
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Customer: {open.customer}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Validity: {open.validity}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Offer: {inr(open.priceINR)}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 ring-1 ring-white/30 ${
+                      open.status === "Approved" ||
+                      open.status === "Locked" ||
+                      open.status === "Sent"
+                        ? "bg-emerald-400/25"
+                        : open.status === "Rejected"
+                        ? "bg-rose-400/25"
+                        : "bg-amber-400/25"
+                    }`}
+                  >
+                    {open.status}
+                  </span>
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                    Created: {new Date(open.createdAt).toLocaleString()}
+                  </span>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              {/* BODY */}
+              <div className="flex-1 overflow-y-auto px-5 pb-24 pt-4">
                 {/* Route & Customer */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="text-sm font-medium text-gray-800 dark:text-white/90">
                     Route & Customer
                   </div>
-                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {open.originCode} – {open.originName} →{" "}
-                    {open.destinationCode} – {open.destinationName}
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
                     <div>
                       Customer: <b>{open.customer}</b>
                     </div>
@@ -469,11 +519,17 @@ export default function Quotes() {
                       Created:{" "}
                       <b>{new Date(open.createdAt).toLocaleString()}</b>
                     </div>
+                    {open.lockedAt && (
+                      <div className="col-span-2">
+                        Locked at:{" "}
+                        <b>{new Date(open.lockedAt).toLocaleString()}</b>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Price & Breakup */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                {/* Offer & Breakup */}
+                <div className="mt-4 rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="text-sm font-medium text-gray-800 dark:text-white/90">
                       Offer Price
@@ -485,72 +541,80 @@ export default function Quotes() {
                   <div className="text-sm font-medium text-gray-800 dark:text-white/90">
                     Price Breakup
                   </div>
-                  <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                  <ul className="mt-2 divide-y divide-gray-100 text-sm text-gray-700 dark:divide-gray-800 dark:text-gray-300">
                     {open.charges.map((c) => (
                       <li
                         key={c.label}
-                        className="flex items-center justify-between"
+                        className="flex items-center justify-between py-1.5"
                       >
                         <span>{c.label}</span>
-                        <span>{inr(c.amount)}</span>
+                        <span className="font-medium">{inr(c.amount)}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* Actions */}
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
-                  <div className="mb-2 text-sm font-medium text-gray-800 dark:text-white/90">
-                    Actions
+                {/* Notes (optional) */}
+                {open.remarks && (
+                  <div className="mt-4 rounded-2xl border border-gray-200 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
+                    Remarks: {open.remarks}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(open.status === "Pending Approval" ||
-                      open.status === "Draft") && (
-                      <>
-                        <button
-                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
-                          onClick={() => approve(open.id)}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700"
-                          onClick={() => reject(open.id)}
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    {(open.status === "Approved" || open.status === "Sent") && (
+                )}
+              </div>
+
+              {/* STICKY FOOTER ACTIONS */}
+              <div className="sticky bottom-0 left-0 right-0 border-t border-gray-200 bg-white/85 px-5 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-900/85">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    onClick={() => setOpenId(null)}
+                  >
+                    Close
+                  </button>
+
+                  {(open.status === "Pending Approval" ||
+                    open.status === "Draft") && (
+                    <>
                       <button
-                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
-                        onClick={() => lock(open.id)}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-700"
+                        onClick={() => approve(open.id)}
                       >
-                        Lock Quote
+                        Approve
                       </button>
-                    )}
-                    {open.status === "Locked" && (
                       <button
-                        className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
-                        onClick={() => unlock(open.id)}
+                        className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-medium text-white hover:bg-rose-700"
+                        onClick={() => reject(open.id)}
                       >
-                        Unlock
+                        Reject
                       </button>
-                    )}
-                    {open.status !== "Rejected" && (
-                      <button
-                        className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-700"
-                        onClick={() => send(open.id)}
-                      >
-                        Send to Customer
-                      </button>
-                    )}
-                  </div>
-                  {open.lockedAt && (
-                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                      Locked at:{" "}
-                      <b>{new Date(open.lockedAt).toLocaleString()}</b>
-                    </div>
+                    </>
+                  )}
+
+                  {(open.status === "Approved" || open.status === "Sent") && (
+                    <button
+                      className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+                      onClick={() => lock(open.id)}
+                    >
+                      Lock Quote
+                    </button>
+                  )}
+
+                  {open.status === "Locked" && (
+                    <button
+                      className="rounded-lg bg-amber-600 px-4 py-2 text-xs font-medium text-white hover:bg-amber-700"
+                      onClick={() => unlock(open.id)}
+                    >
+                      Unlock
+                    </button>
+                  )}
+
+                  {open.status !== "Rejected" && (
+                    <button
+                      className="rounded-lg bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700"
+                      onClick={() => send(open.id)}
+                    >
+                      Send to Customer
+                    </button>
                   )}
                 </div>
               </div>

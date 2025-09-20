@@ -537,50 +537,90 @@ export default function CustomRateRequests() {
         </Section>
       </div>
 
-      {/* Drawer: Request details */}
-      {/* Drawer: Request details */}
       {open &&
         createPortal(
-          <div className="fixed inset-0 z-[9999]">
+          <div
+            className="fixed inset-0 z-[200000]" /* above header/sidebar */
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="crr-drawer-title"
+          >
             {/* Backdrop */}
             <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-[1px]"
               onClick={close}
             />
-            {/* Panel */}
+
+            {/* Drawer panel */}
             <div
               ref={panelRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Custom rate request ${open.id}`}
               tabIndex={-1}
-              className="absolute right-0 top-0 h-full w-full max-w-lg overflow-y-auto
-                   bg-white p-5 shadow-2xl dark:bg-gray-900"
+              onClick={(e) => e.stopPropagation()}
+              className="
+          fixed right-0 inset-y-0 z-[200001]
+          w-full max-w-xl
+          bg-white shadow-2xl outline-none dark:bg-gray-900
+          flex flex-col
+        "
             >
-              <div className="mb-4 flex items-center justify-between">
-                <div className="text-base font-semibold text-gray-800 dark:text-white/90">
-                  {open.id} · {open.direction} {open.service}
+              {/* HEADER */}
+              <div className="relative">
+                <div className="bg-gradient-to-r from-sky-600 to-blue-600 px-5 pb-4 pt-5 text-white">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div
+                        id="crr-drawer-title"
+                        className="text-base font-semibold"
+                      >
+                        {open.id} · {open.direction} {open.service}
+                      </div>
+                      <div className="mt-0.5 text-[12px]/5 opacity-90">
+                        {open.originCode} – {open.originName} →{" "}
+                        {open.destinationCode} – {open.destinationName}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* quick chips */}
+                  <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                    <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                      Container: {open.container}
+                    </span>
+                    <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                      Weight: {open.weightKg || "—"} kg
+                    </span>
+                    <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                      Incoterm: {open.incoterm || "—"}
+                    </span>
+                    <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                      Valid till: {open.validity || "—"}
+                    </span>
+                    <span className="rounded-full bg-white/15 px-2 py-0.5 ring-1 ring-white/30">
+                      Target: {inr(open.targetRateINR)}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 ring-1 ring-white/30 ${
+                        open.status === "Quoted"
+                          ? "bg-emerald-400/25"
+                          : open.status === "Rejected"
+                          ? "bg-rose-400/25"
+                          : "bg-amber-400/25"
+                      }`}
+                    >
+                      {open.status}
+                    </span>
+                  </div>
                 </div>
-                <button
-                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
-                  onClick={close}
-                >
-                  Close
-                </button>
               </div>
 
-              {/* keep your three sections unchanged */}
-              {/* Route & Details */}
-              <div className="space-y-4">
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+              {/* BODY */}
+              <div className="flex-1 overflow-y-auto px-5 pb-24 pt-4">
+                {/* Route & Details */}
+                <div className="rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="text-sm font-medium text-gray-800 dark:text-white/90">
                     Route & Details
                   </div>
-                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    {open.originCode} – {open.originName} →{" "}
-                    {open.destinationCode} – {open.destinationName}
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
                     <div>
                       Container: <b>{open.container}</b>
                     </div>
@@ -600,14 +640,15 @@ export default function CustomRateRequests() {
                       Status: <b>{open.status}</b>
                     </div>
                   </div>
-                  {open.notes ? (
+                  {open.notes && (
                     <div className="mt-3 text-sm text-gray-700 dark:text-gray-300">
                       Notes: {open.notes}
                     </div>
-                  ) : null}
+                  )}
                 </div>
 
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                {/* Timeline & Actions */}
+                <div className="mt-4 rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="mb-2 text-sm font-medium text-gray-800 dark:text-white/90">
                     Workflow Timeline
                   </div>
@@ -666,21 +707,74 @@ export default function CustomRateRequests() {
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                {/* Attachments */}
+                <div className="mt-4 rounded-2xl border border-gray-200 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
                   <div className="mb-2 text-sm font-medium text-gray-800 dark:text-white/90">
                     Attachments
                   </div>
                   {open.attachments?.length ? (
-                    <ul className="list-disc pl-5 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="flex flex-wrap gap-2">
                       {open.attachments.map((f) => (
-                        <li key={f}>{f}</li>
+                        <span
+                          key={f}
+                          className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                        >
+                          <svg
+                            className="size-3.5 opacity-70"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M4 3a2 2 0 012-2h5.586a2 2 0 011.414.586l3.414 3.414A2 2 0 0117 6.414V17a2 2 0 01-2 2H6a2 2 0 01-2-2V3z" />
+                          </svg>
+                          {f}
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   ) : (
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       No files
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* STICKY FOOTER */}
+              <div className="sticky bottom-0 left-0 right-0 border-t border-gray-200 bg-white/85 px-5 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-900/85">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    onClick={close}
+                  >
+                    Close
+                  </button>
+                  <button
+                    className="rounded-lg bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+                    onClick={() => convertToQuote(open.id)}
+                    disabled={
+                      open.status === "Quoted" || open.status === "Rejected"
+                    }
+                  >
+                    Convert to Quote
+                  </button>
+                  <button
+                    className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700"
+                    onClick={() => assign(open.id, "Sales")}
+                  >
+                    Assign to Sales
+                  </button>
+                  <button
+                    className="rounded-lg bg-purple-600 px-4 py-2 text-xs font-medium text-white hover:bg-purple-700"
+                    onClick={() => assign(open.id, "Pricing")}
+                  >
+                    Assign to Pricing
+                  </button>
+                  <button
+                    className="rounded-lg bg-rose-600 px-4 py-2 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                    onClick={() => reject(open.id)}
+                    disabled={open.status === "Rejected"}
+                  >
+                    Reject
+                  </button>
                 </div>
               </div>
             </div>

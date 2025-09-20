@@ -22,6 +22,26 @@ import SearchRates from "./pages/Rates/SearchRates";
 import CustomRateRequests from "./pages/Rates/CustomRateRequests";
 import Quotes from "./pages/Rates/Quotes";
 import QuoteApprovals from "./pages/Rates/QuoteApprovals";
+import VendorApprovals from "./pages/Vendor/VendorApprovals";
+import VendorOrders from "./pages/Vendor/VendorOrders";
+import ShipmentExecution from "./pages/Vendor/ShipmentExecution";
+
+import ShipmentDetailsForQuote from "./pages/Pricing/ShipmentDetailsForQuote";
+import PriceUploading from "./pages/Pricing/PriceUploading";
+import PriceComparison from "./pages/Pricing/PriceComparison";
+import ApiPriceFetching from "./pages/Pricing/ApiPriceFetching";
+import PriceSelection from "./pages/Pricing/PriceSelection";
+import PricingDashboard from "./pages/Pricing/PricingDashboard";
+import CompareFreightRates from "./pages/Rates/CompareFreightRates";
+import ManageBookings from "./pages/Rates/ManageBookings";
+import BookFclLclShipments from "./pages/Rates/BookFclLclShipments";
+import ShipmentTrackingMilestones from "./pages/Operations/ShipmentTrackingMilestones";
+import Invoices from "./pages/Billing/Invoices";
+import Payments from "./pages/Billing/Payments";
+import Disputes from "./pages/Billing/Disputes";
+import Subscription from "./pages/Billing/Subscription";
+import ManageArticles from "./pages/CmsManagement/ManageArticles";
+import Knowledge from "./pages/CmsManagement/Knowledge";
 
 export default function App() {
   return (
@@ -37,6 +57,8 @@ export default function App() {
             <Route path="/profile" element={<UserProfiles />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/blank" element={<Blank />} />
+
+            {/* vendors */}
             <Route path="/search" element={<SearchRates />} />
             <Route
               path="/rates/custom-requests"
@@ -44,7 +66,50 @@ export default function App() {
             />
             <Route path="/quotes" element={<Quotes />} />
             <Route path="/quotes/approvals" element={<QuoteApprovals />} />
+            <Route
+              path="/vendor/vendors-approvals"
+              element={<VendorApprovals />}
+            />
+            <Route path="/vendor/vendor-orders" element={<VendorOrders />} />
+            <Route
+              path="/vendor/shipments/execution"
+              element={<ShipmentExecution />}
+            />
+            {/* Pricing Managers */}
+            <Route path="/pricing/upload" element={<PriceUploading />} />
+            <Route path="/pricing/compare" element={<PriceComparison />} />
+            <Route path="/pricing/api" element={<ApiPriceFetching />} />
+            <Route path="/pricing/selection" element={<PriceSelection />} />
+            <Route path="/pricing/dashboard" element={<PricingDashboard />} />
 
+            {/* <Route
+              path="/rates/shipment-details"
+              element={<ShipmentDetailsForQuote />}
+            /> */}
+
+            {/* Freight rates & quotes */}
+            <Route path="/rates/compare" element={<CompareFreightRates />} />
+            <Route
+              path="/rates/shipment-details"
+              element={<ShipmentDetailsForQuote />}
+            />
+            <Route path="/rates/bookings" element={<ManageBookings />} />
+            <Route path="/rates/book" element={<BookFclLclShipments />} />
+
+            {/* shipment tracking  */}
+            <Route
+              path="/operations/tracking"
+              element={<ShipmentTrackingMilestones />}
+            />
+
+            {/* Bills &  Payment*/}
+            <Route path="/billing/invoices" element={<Invoices />} />
+            <Route path="/billing/payments" element={<Payments />} />
+            <Route path="/billing/disputes" element={<Disputes />} />
+            <Route path="/billing/subscription" element={<Subscription />} />
+            {/* Cms management */}
+            <Route path="/cms/articles" element={<ManageArticles />} />
+            <Route path="/cms/knowledge" element={<Knowledge />} />
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
 

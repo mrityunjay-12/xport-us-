@@ -16,6 +16,7 @@ import {
   BoltIcon,
   UserCircleIcon,
   DocsIcon,
+  TimeIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -37,146 +38,209 @@ const navItems: NavItem[] = [
 
   /** === RATES & QUOTES (kept original + added items) === **/
   {
-    name: "Rates & Availability",
+    name: "Freight Rates & Quotes",
     icon: <BoltIcon />,
     subItems: [
-      { name: "Search", path: "/search", pro: false }, // existing
+      // { name: "Search", path: "/search", pro: false }, // existing
+      // {
+      //   name: "Custom Rate Requests",
+      //   path: "/rates/custom-requests",
+      //   pro: false,
+      // },
+      // { name: "Quotes", path: "/quotes", pro: false },
+      // { name: "Quote Approvals", path: "/quotes/approvals", pro: false },
+      { name: "Compare Freight Rates", path: "/rates/compare", pro: false },
       {
-        name: "Custom Rate Requests",
-        path: "/rates/custom-requests",
+        name: "Enter Shipment Details for Quotes",
+        path: "/rates/shipment-details",
         pro: false,
       },
-      { name: "Quotes", path: "/quotes", pro: false },
-      { name: "Quote Approvals", path: "/quotes/approvals", pro: false },
+      { name: "Manage Bookings", path: "/rates/bookings", pro: false },
+      { name: "Book FCL & LCL Shipments", path: "/rates/book", pro: false },
     ],
   },
 
-  /** === BILLING (kept original + added items) === **/
+  //Shipping & Logistics
+
   {
-    name: "Billing & Invoices",
+    name: "Vendors",
+    icon: <BoxCubeIcon />, // already imported in your icons
+    subItems: [
+      {
+        name: "Register & Approve",
+        path: "/vendor/vendors-approvals",
+        pro: false,
+      },
+      { name: "Vendor Orders", path: "/vendor/vendor-orders", pro: false },
+      {
+        name: "Shipment Execution",
+        path: "/vendor/shipments/execution",
+        pro: false,
+      },
+    ],
+  },
+  {
+    name: "Pricing Manager",
     icon: <DocsIcon />,
     subItems: [
-      { name: "Search", path: "/search", pro: false }, // existing
-      { name: "Billing Queue", path: "/billing/queue", pro: false },
-      { name: "Invoices", path: "/invoices", pro: false },
+      { name: "Price Uploading", path: "/pricing/upload", pro: false },
+      { name: "API Price Fetching", path: "/pricing/api", pro: false },
+      { name: "Price Comparison", path: "/pricing/compare", pro: false },
+      { name: "Price Selection", path: "/pricing/selection", pro: false },
+      { name: "Dashboard & Reports", path: "/pricing/dashboard", pro: false },
+    ],
+  },
+  {
+    name: "Bookings & Operations",
+    icon: <TimeIcon />,
+    subItems: [
+      // keep your existing items…
+      {
+        name: "Shipment Tracking & Milestones",
+        path: "/operations/tracking",
+        pro: false,
+      },
+    ],
+  },
+  {
+    name: "Billing & Payments",
+    icon: <PageIcon />,
+    subItems: [
+      // keep your existing items…
+      { name: "Manage Invoices", path: "/billing/invoices", pro: false },
+      { name: "Track Payments", path: "/billing/payments", pro: false },
+      { name: "Handle Disputes", path: "/billing/disputes", pro: false },
+      {
+        name: "Subscription Status",
+        path: "/billing/subscription",
+        pro: false,
+      },
+    ],
+  },
+
+  {
+    name: "CMS Management",
+    icon: <PieChartIcon />,
+    subItems: [
+      // keep your existing items…
+      { name: "Manage Articles", path: "/cms/articles", pro: false },
+      { name: "View Articles & Guides", path: "/cms/knowledge", pro: false },
     ],
   },
 
   /** === CALENDAR & PROFILE (unchanged) === **/
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
+  // {
+  //   icon: <CalenderIcon />,
+  //   name: "Calendar",
+  //   path: "/calendar",
+  // },
+  // {
+  //   icon: <UserCircleIcon />,
+  //   name: "User Profile",
+  //   path: "/profile",
+  // },
 
   /** === CUSTOMERS & KYC (new) === **/
-  {
-    name: "Customers & KYC",
-    icon: <UserCircleIcon />,
-    subItems: [
-      { name: "Customer Profiles", path: "/customers", pro: false },
-      { name: "KYC Queue", path: "/kyc", pro: false },
-    ],
-  },
+  // {
+  //   name: "Customers & KYC",
+  //   icon: <UserCircleIcon />,
+  //   subItems: [
+  //     { name: "Customer Profiles", path: "/customers", pro: false },
+  //     { name: "KYC Queue", path: "/kyc", pro: false },
+  //   ],
+  // },
 
   /** === BOOKINGS & OPERATIONS (new) === **/
-  {
-    name: "Bookings & Operations",
-    icon: <BoxCubeIcon />,
-    subItems: [
-      { name: "New Booking", path: "/bookings/new", pro: false },
-      { name: "Ops Board", path: "/ops/board", pro: false },
-      { name: "CRO", path: "/ops/cro", pro: false },
-      { name: "SI Issue", path: "/ops/si", pro: false },
-      { name: "Container Pickup", path: "/ops/pickup", pro: false },
-      {
-        name: "Shipment Instruction",
-        path: "/ops/ship-instruction",
-        pro: false,
-      },
-      { name: "BL Drafts", path: "/ops/bl-draft", pro: false },
-    ],
-  },
+  // {
+  //   name: "Bookings & Operations",
+  //   icon: <BoxCubeIcon />,
+  //   subItems: [
+  //     { name: "New Booking", path: "/bookings/new", pro: false },
+  //     { name: "Ops Board", path: "/ops/board", pro: false },
+  //     { name: "CRO", path: "/ops/cro", pro: false },
+  //     { name: "SI Issue", path: "/ops/si", pro: false },
+  //     { name: "Container Pickup", path: "/ops/pickup", pro: false },
+  //     {
+  //       name: "Shipment Instruction",
+  //       path: "/ops/ship-instruction",
+  //       pro: false,
+  //     },
+  //     { name: "BL Drafts", path: "/ops/bl-draft", pro: false },
+  //   ],
+  // },
 
   /** === SLA & ALERTS (new) === **/
-  {
-    name: "SLA & Alerts",
-    icon: <PlugInIcon />,
-    subItems: [
-      { name: "Rules", path: "/sla/rules", pro: false },
-      { name: "Notifications", path: "/sla/notifications", pro: false },
-    ],
-  },
+  // {
+  //   name: "SLA & Alerts",
+  //   icon: <PlugInIcon />,
+  //   subItems: [
+  //     { name: "Rules", path: "/sla/rules", pro: false },
+  //     { name: "Notifications", path: "/sla/notifications", pro: false },
+  //   ],
+  // },
 
-  /** === AUDIT & LOGS (new) === **/
-  {
-    name: "Audit & Logs",
-    icon: <PieChartIcon />,
-    subItems: [
-      { name: "Activity Timeline", path: "/audit", pro: false },
-      { name: "Exports", path: "/audit/exports", pro: false },
-    ],
-  },
+  // {
+  //   name: "Audit & Logs",
+  //   icon: <PieChartIcon />,
+  //   subItems: [
+  //     { name: "Activity Timeline", path: "/audit", pro: false },
+  //     { name: "Exports", path: "/audit/exports", pro: false },
+  //   ],
+  // },
 
-  /** === ADMIN SETTINGS (new) === **/
-  {
-    name: "Admin Settings",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Users & Roles", path: "/settings/users", pro: false },
-      { name: "Masters", path: "/settings/masters", pro: false },
-      { name: "Doc Templates", path: "/settings/templates", pro: false },
-      { name: "Integrations", path: "/settings/integrations", pro: false },
-    ],
-  },
+  // {
+  //   name: "Admin Settings",
+  //   icon: <PageIcon />,
+  //   subItems: [
+  //     { name: "Users & Roles", path: "/settings/users", pro: false },
+  //     { name: "Masters", path: "/settings/masters", pro: false },
+  //     { name: "Doc Templates", path: "/settings/templates", pro: false },
+  //     { name: "Integrations", path: "/settings/integrations", pro: false },
+  //   ],
+  // },
 
   /** === ORIGINAL ITEMS BELOW (unchanged) === **/
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
+  // {
+  //   name: "Forms",
+  //   icon: <ListIcon />,
+  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
+  // },
+  // {
+  //   name: "Tables",
+  //   icon: <TableIcon />,
+  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
+  // },
+  // {
+  //   name: "Pages",
+  //   icon: <PageIcon />,
+  //   subItems: [
+  //     { name: "Blank Page", path: "/blank", pro: false },
+  //     { name: "404 Error", path: "/error-404", pro: false },
+  //   ],
+  // },
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
+  // {
+  //   icon: <PieChartIcon />,
+  //   name: "Charts",
+  //   subItems: [
+  //     { name: "Line Chart", path: "/line-chart", pro: false },
+  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <BoxCubeIcon />,
+  //   name: "UI Elements",
+  //   subItems: [
+  //     { name: "Alerts", path: "/alerts", pro: false },
+  //     { name: "Avatar", path: "/avatars", pro: false },
+  //     { name: "Badge", path: "/badge", pro: false },
+  //     { name: "Buttons", path: "/buttons", pro: false },
+  //     { name: "Images", path: "/images", pro: false },
+  //     { name: "Videos", path: "/videos", pro: false },
+  //   ],
+  // },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
