@@ -42,6 +42,7 @@ import Disputes from "./pages/Billing/Disputes";
 import Subscription from "./pages/Billing/Subscription";
 import ManageArticles from "./pages/CmsManagement/ManageArticles";
 import Knowledge from "./pages/CmsManagement/Knowledge";
+import Notifications from "./pages/Notification/Notifications";
 
 export default function App() {
   return (
@@ -49,9 +50,11 @@ export default function App() {
       <Router>
         <ScrollToTop />
         <Routes>
+          <Route path="/" element={<SignIn />} />
+
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+            <Route index path="/dashboard" element={<Home />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -110,6 +113,9 @@ export default function App() {
             {/* Cms management */}
             <Route path="/cms/articles" element={<ManageArticles />} />
             <Route path="/cms/knowledge" element={<Knowledge />} />
+
+            {/* notifiction */}
+            <Route path="/notifications" element={<Notifications />} />
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
 

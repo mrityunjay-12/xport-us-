@@ -1,260 +1,427 @@
+// AppSidebar.tsx
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
-
-// Assume these icons are imported from an icon library
 import {
   BoxCubeIcon,
-  CalenderIcon,
   ChevronDownIcon,
-  GridIcon,
   HorizontaLDots,
-  ListIcon,
   PageIcon,
   PieChartIcon,
   PlugInIcon,
-  TableIcon,
   BoltIcon,
-  UserCircleIcon,
   DocsIcon,
   TimeIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
 
+/* ========== ROLES ========== */
+export type Role =
+  | "SUPER_ADMIN"
+  | "OPS_TEAM"
+  | "PRICING_MANAGER_VENDOR_SHIPLINE"
+  | "CUSTOMER_ORDER_CREATOR"
+  | "END_CUSTOMER";
+
+/** Read role from SignInForm (localStorage), fallback to SUPER_ADMIN */
+const readRole = (): Role => {
+  const v = localStorage.getItem("demo_role") as Role | null;
+  return (
+    v ??
+    ([
+      "SUPER_ADMIN",
+      "OPS_TEAM",
+      "PRICING_MANAGER_VENDOR_SHIPLINE",
+      "CUSTOMER_ORDER_CREATOR",
+      "END_CUSTOMER",
+    ][0] as Role)
+  );
+};
+
+/* Per-role dashboard route (matches your SignInForm) */
+const roleDashboard: Record<Role, string> = {
+  SUPER_ADMIN: "/dashboard",
+  OPS_TEAM: "/dashboard",
+  PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard",
+  CUSTOMER_ORDER_CREATOR: "/dashboard",
+  END_CUSTOMER: "/dashboard",
+};
+
+/* ========== NAV MODEL ========== */
+type SubItem = { name: string; path: string; pro?: boolean; new?: boolean };
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: SubItem[];
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-    // subItems: [{ name: "Ecommerce", path: "/", pro: false }],
-  },
-
-  /** === RATES & QUOTES (kept original + added items) === **/
-  {
-    name: "Freight Rates & Quotes",
-    icon: <BoltIcon />,
-    subItems: [
-      // { name: "Search", path: "/search", pro: false }, // existing
-      // {
-      //   name: "Custom Rate Requests",
-      //   path: "/rates/custom-requests",
-      //   pro: false,
-      // },
-      // { name: "Quotes", path: "/quotes", pro: false },
-      // { name: "Quote Approvals", path: "/quotes/approvals", pro: false },
-      { name: "Compare Freight Rates", path: "/rates/compare", pro: false },
-      {
-        name: "Enter Shipment Details for Quotes",
-        path: "/rates/shipment-details",
-        pro: false,
-      },
-      { name: "Manage Bookings", path: "/rates/bookings", pro: false },
-      { name: "Book FCL & LCL Shipments", path: "/rates/book", pro: false },
-    ],
-  },
-
-  //Shipping & Logistics
-
+  // --- Vendor Management ---
   {
     name: "Vendors",
-    icon: <BoxCubeIcon />, // already imported in your icons
+    icon: <BoxCubeIcon />,
     subItems: [
+      { name: "Register & Approve", path: "/vendor/vendors-approvals" },
+      { name: "Manage Vendor Orders", path: "/vendor/vendor-orders" },
       {
-        name: "Register & Approve",
-        path: "/vendor/vendors-approvals",
-        pro: false,
-      },
-      { name: "Vendor Orders", path: "/vendor/vendor-orders", pro: false },
-      {
-        name: "Shipment Execution",
+        name: "Handle Shipment Execution",
         path: "/vendor/shipments/execution",
-        pro: false,
       },
     ],
   },
+
+  // --- Pricing Manager ---
   {
     name: "Pricing Manager",
     icon: <DocsIcon />,
     subItems: [
-      { name: "Price Uploading", path: "/pricing/upload", pro: false },
-      { name: "API Price Fetching", path: "/pricing/api", pro: false },
-      { name: "Price Comparison", path: "/pricing/compare", pro: false },
-      { name: "Price Selection", path: "/pricing/selection", pro: false },
-      { name: "Dashboard & Reports", path: "/pricing/dashboard", pro: false },
+      { name: "Price Uploading", path: "/pricing/upload" },
+      { name: "API Price Fetching", path: "/pricing/api" }, // N/A for Pricing role
+      { name: "Price Comparison", path: "/pricing/compare" },
+      { name: "Price Selection", path: "/pricing/selection" },
+      { name: "Dashboard & Reports", path: "/pricing/dashboard" },
     ],
   },
+
+  // --- Freight Booking & Rates ---
+  {
+    name: "Freight Rates & Quotes",
+    icon: <BoltIcon />,
+    subItems: [
+      { name: "Compare Freight Rates", path: "/rates/compare" },
+      {
+        name: "Enter Shipment Details for Quotes",
+        path: "/rates/shipment-details",
+      },
+      { name: "Manage Bookings", path: "/rates/bookings" },
+      { name: "Book FCL & LCL Shipments", path: "/rates/book" },
+    ],
+  },
+
+  // --- Shipment Tracking ---
   {
     name: "Bookings & Operations",
     icon: <TimeIcon />,
     subItems: [
-      // keep your existing items…
-      {
-        name: "Shipment Tracking & Milestones",
-        path: "/operations/tracking",
-        pro: false,
-      },
+      { name: "Shipment Tracking & Milestones", path: "/operations/tracking" },
     ],
   },
+
+  // --- Notifications ---
+  {
+    name: "Notifications",
+    icon: <PlugInIcon />,
+    subItems: [{ name: "All Alerts & Actions", path: "/notifications" }],
+  },
+
+  // --- Billing & Payments ---
   {
     name: "Billing & Payments",
     icon: <PageIcon />,
     subItems: [
-      // keep your existing items…
-      { name: "Manage Invoices", path: "/billing/invoices", pro: false },
-      { name: "Track Payments", path: "/billing/payments", pro: false },
-      { name: "Handle Disputes", path: "/billing/disputes", pro: false },
-      {
-        name: "Subscription Status",
-        path: "/billing/subscription",
-        pro: false,
-      },
+      { name: "Manage Invoices", path: "/billing/invoices" },
+      { name: "Track Payments", path: "/billing/payments" },
+      { name: "Handle Disputes", path: "/billing/disputes" }, // Customer: raise only
+      { name: "View Subscription Status", path: "/billing/subscription" },
     ],
   },
 
+  // --- CMS ---
   {
     name: "CMS Management",
     icon: <PieChartIcon />,
     subItems: [
-      // keep your existing items…
-      { name: "Manage Articles", path: "/cms/articles", pro: false },
-      { name: "View Articles & Guides", path: "/cms/knowledge", pro: false },
+      { name: "Manage Articles", path: "/cms/articles" }, // admin only
+      { name: "View Articles & Guides", path: "/cms/knowledge" }, // SA(admin badge), Pricing/Customer/End full
     ],
   },
 
-  /** === CALENDAR & PROFILE (unchanged) === **/
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
-
-  /** === CUSTOMERS & KYC (new) === **/
-  // {
-  //   name: "Customers & KYC",
-  //   icon: <UserCircleIcon />,
-  //   subItems: [
-  //     { name: "Customer Profiles", path: "/customers", pro: false },
-  //     { name: "KYC Queue", path: "/kyc", pro: false },
-  //   ],
-  // },
-
-  /** === BOOKINGS & OPERATIONS (new) === **/
-  // {
-  //   name: "Bookings & Operations",
-  //   icon: <BoxCubeIcon />,
-  //   subItems: [
-  //     { name: "New Booking", path: "/bookings/new", pro: false },
-  //     { name: "Ops Board", path: "/ops/board", pro: false },
-  //     { name: "CRO", path: "/ops/cro", pro: false },
-  //     { name: "SI Issue", path: "/ops/si", pro: false },
-  //     { name: "Container Pickup", path: "/ops/pickup", pro: false },
-  //     {
-  //       name: "Shipment Instruction",
-  //       path: "/ops/ship-instruction",
-  //       pro: false,
-  //     },
-  //     { name: "BL Drafts", path: "/ops/bl-draft", pro: false },
-  //   ],
-  // },
-
-  /** === SLA & ALERTS (new) === **/
-  // {
-  //   name: "SLA & Alerts",
-  //   icon: <PlugInIcon />,
-  //   subItems: [
-  //     { name: "Rules", path: "/sla/rules", pro: false },
-  //     { name: "Notifications", path: "/sla/notifications", pro: false },
-  //   ],
-  // },
-
-  // {
-  //   name: "Audit & Logs",
-  //   icon: <PieChartIcon />,
-  //   subItems: [
-  //     { name: "Activity Timeline", path: "/audit", pro: false },
-  //     { name: "Exports", path: "/audit/exports", pro: false },
-  //   ],
-  // },
-
-  // {
-  //   name: "Admin Settings",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Users & Roles", path: "/settings/users", pro: false },
-  //     { name: "Masters", path: "/settings/masters", pro: false },
-  //     { name: "Doc Templates", path: "/settings/templates", pro: false },
-  //     { name: "Integrations", path: "/settings/integrations", pro: false },
-  //   ],
-  // },
-
-  /** === ORIGINAL ITEMS BELOW (unchanged) === **/
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
+  // --- Analytics & Reports (SA only) ---
+  {
+    name: "Analytics & Reports",
+    icon: <PieChartIcon />,
+    subItems: [
+      { name: "User & Activity Reports", path: "/analytics/user-activity" },
+      { name: "Revenue Reports", path: "/analytics/revenue" },
+      { name: "Booking Trends", path: "/analytics/booking-trends" },
+      { name: "Vendor Performance", path: "/analytics/vendor-performance" },
+    ],
+  },
 ];
 
 const othersItems: NavItem[] = [
-  // {
-  //   icon: <PieChartIcon />,
-  //   name: "Charts",
-  //   subItems: [
-  //     { name: "Line Chart", path: "/line-chart", pro: false },
-  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/badge", pro: false },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
   {
     icon: <PlugInIcon />,
     name: "Authentication",
     subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
+      { name: "Sign In", path: "/signin" },
+      { name: "Sign Up", path: "/signup" },
     ],
   },
 ];
+
+/* ========== ACCESS RULES ========== */
+type Access = "full" | "view" | "rate" | "raise" | "admin" | "none";
+const A = (value: Access) => value;
+type AccessTable = Record<Role, Record<string, Access>>;
+
+const ACCESS_TABLE: AccessTable = {
+  SUPER_ADMIN: {
+    "/dashboard": A("full"),
+
+    // Super Admin Management
+    "/admin/users": A("full"),
+    "/admin/vendor-subscriptions": A("full"),
+    "/admin/platform-settings": A("full"),
+    "/admin/vendors-and-subscriptions": A("full"),
+    "/admin/saas-pricing-plans": A("full"),
+    "/admin/analytics-activities": A("full"),
+    "/admin/security-permissions": A("full"),
+
+    // Vendor
+    "/vendor/vendors-approvals": A("full"),
+    "/vendor/vendor-orders": A("full"),
+    "/vendor/shipments/execution": A("full"),
+
+    // Pricing
+    "/pricing/upload": A("full"),
+    "/pricing/api": A("full"),
+    "/pricing/compare": A("full"),
+    "/pricing/selection": A("full"),
+    "/pricing/dashboard": A("full"),
+
+    // Freight
+    "/rates/compare": A("full"),
+    "/rates/shipment-details": A("full"),
+    "/rates/bookings": A("full"),
+    "/rates/book": A("full"),
+
+    // Tracking
+    "/operations/tracking": A("full"),
+
+    // Notifications
+    "/notifications": A("full"),
+
+    // Billing
+    "/billing/invoices": A("full"),
+    "/billing/payments": A("full"),
+    "/billing/disputes": A("full"),
+    "/billing/subscription": A("full"),
+
+    // CMS
+    "/cms/articles": A("admin"),
+    "/cms/knowledge": A("full"),
+
+    // Analytics & Reports
+    "/analytics/user-activity": A("full"),
+    "/analytics/revenue": A("full"),
+    "/analytics/booking-trends": A("full"),
+    "/analytics/vendor-performance": A("full"),
+
+    "/signin": A("full"),
+    "/signup": A("full"),
+  },
+
+  OPS_TEAM: {
+    "/dashboard": A("full"),
+
+    // Vendor/Prices/Freight (no)
+    "/vendor/vendors-approvals": A("full"),
+    "/vendor/vendor-orders": A("full"),
+    "/vendor/shipments/execution": A("full"),
+    "/pricing/upload": A("none"),
+    "/pricing/api": A("none"),
+    "/pricing/compare": A("none"),
+    "/pricing/selection": A("none"),
+    "/pricing/dashboard": A("none"),
+    "/rates/compare": A("none"),
+    "/rates/shipment-details": A("none"),
+    "/rates/bookings": A("none"),
+    "/rates/book": A("none"),
+
+    // Tracking (yes)
+    "/operations/tracking": A("full"),
+
+    // Notifications (yes per sheet)
+    "/notifications": A("full"),
+
+    // Billing (no)
+    "/billing/invoices": A("none"),
+    "/billing/payments": A("none"),
+    "/billing/disputes": A("none"),
+    "/billing/subscription": A("none"),
+
+    // CMS + Analytics (no view for CMS articles; knowledge view allowed)
+    "/cms/articles": A("none"),
+    "/cms/knowledge": A("none"), // sheet shows ❌ for Ops on "View Articles & Guides"
+    "/analytics/user-activity": A("none"),
+    "/analytics/revenue": A("none"),
+    "/analytics/booking-trends": A("none"),
+    "/analytics/vendor-performance": A("none"),
+
+    "/signin": A("none"),
+    "/signup": A("none"),
+  },
+
+  PRICING_MANAGER_VENDOR_SHIPLINE: {
+    "/dashboard": A("full"),
+
+    // Vendor (no)
+    "/vendor/vendors-approvals": A("none"),
+    "/vendor/vendor-orders": A("none"),
+    "/vendor/shipments/execution": A("none"),
+
+    // Pricing (yes except API fetch = N/A)
+    "/pricing/upload": A("full"),
+    "/pricing/api": A("none"), // '-'
+    "/pricing/compare": A("full"),
+    "/pricing/selection": A("full"),
+    "/pricing/dashboard": A("full"),
+
+    // Freight: compare = view-only; rest no
+    "/rates/compare": A("view"),
+    "/rates/shipment-details": A("none"),
+    "/rates/bookings": A("none"),
+    "/rates/book": A("none"),
+
+    // Tracking (yes)
+    "/operations/tracking": A("full"),
+
+    // Notifications (rate-related only)
+    "/notifications": A("rate"),
+
+    // Billing (Track Payments = ✅; rest ❌)
+    "/billing/invoices": A("none"),
+    "/billing/payments": A("full"),
+    "/billing/disputes": A("none"),
+    "/billing/subscription": A("none"),
+
+    // CMS knowledge view ✅
+    "/cms/articles": A("none"),
+    "/cms/knowledge": A("full"),
+
+    // Analytics (no)
+    "/analytics/user-activity": A("none"),
+    "/analytics/revenue": A("none"),
+    "/analytics/booking-trends": A("none"),
+    "/analytics/vendor-performance": A("none"),
+
+    "/signin": A("none"),
+    "/signup": A("none"),
+  },
+
+  CUSTOMER_ORDER_CREATOR: {
+    "/dashboard": A("full"),
+
+    // Vendor: Register & Approve = (self)
+    "/vendor/vendors-approvals": A("full"),
+    "/vendor/vendor-orders": A("full"),
+    "/vendor/shipments/execution": A("full"),
+
+    // Pricing (no)
+    "/pricing/upload": A("none"),
+    "/pricing/api": A("none"),
+    "/pricing/compare": A("none"),
+    "/pricing/selection": A("none"),
+    "/pricing/dashboard": A("none"),
+
+    // Freight (all yes)
+    "/rates/compare": A("full"),
+    "/rates/shipment-details": A("full"),
+    "/rates/bookings": A("full"),
+    "/rates/book": A("full"),
+
+    // Tracking (yes)
+    "/operations/tracking": A("full"),
+
+    // Notifications (yes)
+    "/notifications": A("full"),
+
+    // Billing (yes; disputes = raise only)
+    "/billing/invoices": A("full"),
+    "/billing/payments": A("full"),
+    "/billing/disputes": A("raise"),
+    "/billing/subscription": A("full"),
+
+    // CMS knowledge view ✅
+    "/cms/articles": A("none"),
+    "/cms/knowledge": A("full"),
+
+    // Analytics (no)
+    "/analytics/user-activity": A("none"),
+    "/analytics/revenue": A("none"),
+    "/analytics/booking-trends": A("none"),
+    "/analytics/vendor-performance": A("none"),
+
+    "/signin": A("none"),
+    "/signup": A("none"),
+  },
+
+  END_CUSTOMER: {
+    "/dashboard": A("full"),
+
+    // Vendor: all ❌
+    "/vendor/vendors-approvals": A("none"),
+    "/vendor/vendor-orders": A("none"),
+    "/vendor/shipments/execution": A("none"),
+
+    // Pricing & Freight (no)
+    "/pricing/upload": A("none"),
+    "/pricing/api": A("none"),
+    "/pricing/compare": A("none"),
+    "/pricing/selection": A("none"),
+    "/pricing/dashboard": A("none"),
+    "/rates/compare": A("none"),
+    "/rates/shipment-details": A("none"),
+    "/rates/bookings": A("none"),
+    "/rates/book": A("none"),
+
+    // Tracking (yes)
+    "/operations/tracking": A("full"),
+
+    // Notifications (yes)
+    "/notifications": A("full"),
+
+    // Billing (all ❌)
+    "/billing/invoices": A("none"),
+    "/billing/payments": A("none"),
+    "/billing/disputes": A("none"),
+    "/billing/subscription": A("none"),
+
+    // CMS knowledge view ✅
+    "/cms/articles": A("none"),
+    "/cms/knowledge": A("full"),
+
+    // Analytics (no)
+    "/analytics/user-activity": A("none"),
+    "/analytics/revenue": A("none"),
+    "/analytics/booking-trends": A("none"),
+    "/analytics/vendor-performance": A("none"),
+
+    "/signin": A("none"),
+    "/signup": A("none"),
+  },
+};
+
+/* Badges for special access */
+type AccessBadge = Partial<Record<Access, string>>;
+const ACCESS_BADGE: AccessBadge = {
+  view: "view",
+  rate: "rate-related",
+  raise: "raise only",
+  admin: "admin",
+};
+
+/* Normalize dynamic paths so /dashboard/* matches the /dashboard rule */
+const normalizePath = (p: string) =>
+  p.startsWith("/dashboard") ? "/dashboard" : p;
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
 
+  const [role, setRole] = useState<Role>(readRole());
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
     index: number;
@@ -264,41 +431,74 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // update role when localStorage changes (e.g., user re-signs in)
+  // AppSidebar.tsx
+
+  // A) react to custom role changes in this tab
+  useEffect(() => {
+    const onRoleChange = () => setRole(readRole());
+    window.addEventListener("rolechange", onRoleChange);
+    return () => window.removeEventListener("rolechange", onRoleChange);
+  }, []);
+
+  // B) also re-read on route changes (useful after navigate('/dashboard'))
+  useEffect(() => {
+    setRole(readRole());
+  }, [location.pathname]);
+
   const isActive = useCallback(
-    (path: string) => location.pathname === path,
-    [location.pathname]
+    (path: string) => {
+      const realPath = path === "/" ? roleDashboard[role] : path; // dashboard remap
+      return location.pathname === realPath;
+    },
+    [location.pathname, role]
   );
 
+  const accessOf = (path: string): Access => {
+    const realPath = path === "/" ? roleDashboard[role] : path; // map dashboard
+    return ACCESS_TABLE[role]?.[normalizePath(realPath)] ?? "none";
+  };
+
+  const filterSubItemsByRole = (subs: SubItem[]) =>
+    subs
+      .map((s) => ({ ...s, __access: accessOf(s.path) as Access }))
+      .filter((s) => s.__access !== "none") as (SubItem & {
+      __access: Access;
+    })[];
+
+  /* auto-open submenu for active route */
   useEffect(() => {
-    let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
-      items.forEach((nav, index) => {
+    let matched = false;
+    (
+      [
+        { t: "main", list: navItems },
+        { t: "others", list: othersItems },
+      ] as const
+    ).forEach(({ t, list }) => {
+      list.forEach((nav, idx) => {
         if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "others",
-                index,
-              });
-              submenuMatched = true;
+          const visible = filterSubItemsByRole(nav.subItems);
+          visible.forEach((s) => {
+            if (isActive(s.path)) {
+              setOpenSubmenu({ type: t, index: idx });
+              matched = true;
             }
           });
+        } else if (nav.path && isActive(nav.path)) {
+          matched = true;
         }
       });
     });
-
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
-  }, [location, isActive]);
+    if (!matched) setOpenSubmenu(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, role]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
       if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
+        setSubMenuHeight((prev) => ({
+          ...prev,
           [key]: subMenuRefs.current[key]?.scrollHeight || 0,
         }));
       }
@@ -306,69 +506,53 @@ const AppSidebar: React.FC = () => {
   }, [openSubmenu]);
 
   const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
-    });
+    setOpenSubmenu((prev) =>
+      prev && prev.type === menuType && prev.index === index
+        ? null
+        : { type: menuType, index }
+    );
   };
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "demo_role") setRole(readRole());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
     <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${
-                openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-              } cursor-pointer ${
-                !isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
-              }`}
-            >
-              <span
-                className={`menu-item-icon-size  ${
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-              {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
-                  }`}
-                />
-              )}
-            </button>
-          ) : (
-            nav.path && (
-              <Link
-                to={nav.path}
+      {items.map((nav, index) => {
+        // pre-check leaf access
+        if (nav.path) {
+          const acc = accessOf(nav.path);
+          if (acc === "none") return null;
+        }
+
+        const visibleSubs = nav.subItems
+          ? filterSubItemsByRole(nav.subItems)
+          : [];
+        if (nav.subItems && visibleSubs.length === 0) return null;
+
+        return (
+          <li key={nav.name}>
+            {nav.subItems ? (
+              <button
+                onClick={() => handleSubmenuToggle(index, menuType)}
                 className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  openSubmenu?.type === menuType && openSubmenu?.index === index
+                    ? "menu-item-active"
+                    : "menu-item-inactive"
+                } cursor-pointer ${
+                  !isExpanded && !isHovered
+                    ? "lg:justify-center"
+                    : "lg:justify-start"
                 }`}
               >
                 <span
-                  className={`menu-item-icon-size ${
-                    isActive(nav.path)
+                  className={`menu-item-icon-size  ${
+                    openSubmenu?.type === menuType &&
+                    openSubmenu?.index === index
                       ? "menu-item-icon-active"
                       : "menu-item-icon-inactive"
                   }`}
@@ -378,66 +562,138 @@ const AppSidebar: React.FC = () => {
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span className="menu-item-text">{nav.name}</span>
                 )}
-              </Link>
-            )
-          )}
-          {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[`${menuType}-${index}`] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                    : "0px",
-              }}
-            >
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      to={subItem.path}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path)
-                          ? "menu-dropdown-item-active"
-                          : "menu-dropdown-item-inactive"
+                {(isExpanded || isHovered || isMobileOpen) && (
+                  <ChevronDownIcon
+                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                      openSubmenu?.type === menuType &&
+                      openSubmenu?.index === index
+                        ? "rotate-180 text-brand-500"
+                        : ""
+                    }`}
+                  />
+                )}
+              </button>
+            ) : (
+              nav.path &&
+              (() => {
+                const acc = accessOf(nav.path);
+                if (acc === "none") return null;
+
+                const toPath =
+                  nav.path === "/" ? roleDashboard[role] : nav.path;
+
+                return (
+                  <Link
+                    to={toPath}
+                    className={`menu-item group ${
+                      isActive(nav.path)
+                        ? "menu-item-active"
+                        : "menu-item-inactive"
+                    }`}
+                  >
+                    <span
+                      className={`menu-item-icon-size ${
+                        isActive(nav.path)
+                          ? "menu-item-icon-active"
+                          : "menu-item-icon-inactive"
                       }`}
                     >
-                      {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
+                      {nav.icon}
+                    </span>
+                    {(isExpanded || isHovered || isMobileOpen) && (
+                      <>
+                        <span className="menu-item-text">{nav.name}</span>
+                        {ACCESS_BADGE[acc] && (
                           <span
                             className={`ml-auto ${
-                              isActive(subItem.path)
+                              isActive(nav.path)
                                 ? "menu-dropdown-badge-active"
                                 : "menu-dropdown-badge-inactive"
                             } menu-dropdown-badge`}
                           >
-                            new
+                            {ACCESS_BADGE[acc]}
                           </span>
                         )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            pro
+                      </>
+                    )}
+                  </Link>
+                );
+              })()
+            )}
+
+            {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
+              <div
+                ref={(el) => {
+                  subMenuRefs.current[`${menuType}-${index}`] = el;
+                }}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height:
+                    openSubmenu?.type === menuType &&
+                    openSubmenu?.index === index
+                      ? `${subMenuHeight[`${menuType}-${index}`]}px`
+                      : "0px",
+                }}
+              >
+                <ul className="mt-2 space-y-1 ml-9">
+                  {visibleSubs.map((subItem) => {
+                    const acc = (subItem as any).__access as Access;
+                    return (
+                      <li key={subItem.name}>
+                        <Link
+                          to={subItem.path}
+                          className={`menu-dropdown-item ${
+                            isActive(subItem.path)
+                              ? "menu-dropdown-item-active"
+                              : "menu-dropdown-item-inactive"
+                          }`}
+                        >
+                          {subItem.name}
+                          <span className="flex items-center gap-1 ml-auto">
+                            {ACCESS_BADGE[acc] && (
+                              <span
+                                className={`${
+                                  isActive(subItem.path)
+                                    ? "menu-dropdown-badge-active"
+                                    : "menu-dropdown-badge-inactive"
+                                } menu-dropdown-badge`}
+                              >
+                                {ACCESS_BADGE[acc]}
+                              </span>
+                            )}
+                            {subItem.new && (
+                              <span
+                                className={`${
+                                  isActive(subItem.path)
+                                    ? "menu-dropdown-badge-active"
+                                    : "menu-dropdown-badge-inactive"
+                                } menu-dropdown-badge`}
+                              >
+                                new
+                              </span>
+                            )}
+                            {subItem.pro && (
+                              <span
+                                className={`${
+                                  isActive(subItem.path)
+                                    ? "menu-dropdown-badge-active"
+                                    : "menu-dropdown-badge-inactive"
+                                } menu-dropdown-badge`}
+                              >
+                                pro
+                              </span>
+                            )}
                           </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 
@@ -461,34 +717,21 @@ const AppSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/">
+        <Link to={roleDashboard[role]} aria-label="Xport Us" title="Xport Us">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/white-logo.png"
-                alt="Logo"
-                width={200}
-                height={80}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/dark-logo.png"
-                alt="Logo"
-                width={200}
-                height={80}
-              />
-            </>
+            <span className="inline-flex items-center gap-1 text-2xl lg:text-3xl font-bold tracking-tight leading-none ml-10">
+              <span className="text-sky-600">Xport</span>
+              <span className="text-gray-900 dark:text-gray-100">Us</span>
+            </span>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <span className="inline-flex items-center text-lg font-extrabold tracking-tight leading-none">
+              <span className="text-sky-600">X</span>
+              <span className="text-gray-900 dark:text-gray-100">U</span>
+            </span>
           )}
         </Link>
       </div>
+
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
@@ -508,7 +751,8 @@ const AppSidebar: React.FC = () => {
               </h2>
               {renderMenuItems(navItems, "main")}
             </div>
-            <div className="">
+
+            <div>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
@@ -526,6 +770,7 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
+
         {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>

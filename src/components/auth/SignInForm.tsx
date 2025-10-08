@@ -1,14 +1,86 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 
+type RoleOption =
+  | "SUPER_ADMIN"
+  | "OPS_TEAM"
+  | "PRICING_MANAGER_VENDOR_SHIPLINE"
+  | "CUSTOMER_ORDER_CREATOR"
+  | "END_CUSTOMER";
+
+const ROLE_DEMOS: Record<
+  RoleOption,
+  { email: string; password: string; label: string }
+> = {
+  SUPER_ADMIN: {
+    email: "admin@demo.app",
+    password: "Admin@123", // static
+    label: "Super Admin",
+  },
+  OPS_TEAM: {
+    email: "ops@demo.app",
+    password: "Ops@123", // static
+    label: "Ops Team",
+  },
+  PRICING_MANAGER_VENDOR_SHIPLINE: {
+    email: "pricing@demo.app",
+    password: "Pricing@123", // static
+    label: "Pricing Manager / Vendor / Shipline",
+  },
+  CUSTOMER_ORDER_CREATOR: {
+    email: "customer@demo.app",
+    password: "Customer@123", // static
+    label: "Customer (Order Creator)",
+  },
+  END_CUSTOMER: {
+    email: "end@demo.app",
+    password: "End@123", // static
+    label: "End Customer",
+  },
+};
+
 export default function SignInForm() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const [role, setRole] = useState<RoleOption>("SUPER_ADMIN");
+  const [email, setEmail] = useState(ROLE_DEMOS["SUPER_ADMIN"].email);
+  const [password, setPassword] = useState(ROLE_DEMOS["SUPER_ADMIN"].password);
+
+  const handleRoleChange = (val: RoleOption) => {
+    setRole(val);
+    // auto-fill demo creds (static password)
+    setEmail(ROLE_DEMOS[val].email);
+    setPassword(ROLE_DEMOS[val].password);
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Save role + remember me
+    // in SignInForm onSubmit()
+    localStorage.setItem("demo_role", role);
+    window.dispatchEvent(new Event("rolechange")); // <<< add this
+    if (isChecked) localStorage.setItem("remember_me", "1");
+
+    // Role-based routes
+    const roleRoutes: Record<RoleOption, string> = {
+      SUPER_ADMIN: "/dashboard/",
+      OPS_TEAM: "/dashboard/",
+      PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard/",
+      CUSTOMER_ORDER_CREATOR: "/dashboard/",
+      END_CUSTOMER: "/dashboard/",
+    };
+
+    navigate(roleRoutes[role]);
+  };
+
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -20,6 +92,7 @@ export default function SignInForm() {
           Back to dashboard
         </Link>
       </div>
+
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
@@ -30,9 +103,12 @@ export default function SignInForm() {
               Enter your email and password to sign in!
             </p>
           </div>
+
           <div>
+            {/* social buttons (unchanged) */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+                {/* Google svg */}
                 <svg
                   width="20"
                   height="20"
@@ -60,6 +136,7 @@ export default function SignInForm() {
                 Sign in with Google
               </button>
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
+                {/* X svg */}
                 <svg
                   width="21"
                   className="fill-current"
@@ -73,6 +150,8 @@ export default function SignInForm() {
                 Sign in with X
               </button>
             </div>
+
+            {/* divider */}
             <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
@@ -83,26 +162,40 @@ export default function SignInForm() {
                 </span>
               </div>
             </div>
-            <form>
+
+            {/* form */}
+            <form onSubmit={onSubmit}>
               <div className="space-y-6">
+                {/* Role dropdown */}
+
                 <div>
                   <Label>
-                    Email <span className="text-error-500">*</span>{" "}
+                    Email <span className="text-error-500">*</span>
                   </Label>
-                  <Input placeholder="info@gmail.com" />
+                  <Input
+                    placeholder="info@gmail.com"
+                    value={email}
+                    onChange={(e: any) => setEmail(e.target.value)}
+                  />
                 </div>
+
                 <div>
                   <Label>
-                    Password <span className="text-error-500">*</span>{" "}
+                    Password <span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      value={password}
+                      onChange={(e: any) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
@@ -110,6 +203,35 @@ export default function SignInForm() {
                         <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                       )}
                     </span>
+                  </div>
+                </div>
+                <div>
+                  <Label>
+                    Role <span className="text-error-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <select
+                      value={role}
+                      onChange={(e) =>
+                        handleRoleChange(e.target.value as RoleOption)
+                      }
+                      className="w-full px-4 py-3 text-sm bg-white border rounded-lg appearance-none dark:bg-gray-900 dark:border-gray-800 border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                    >
+                      {Object.entries(ROLE_DEMOS).map(([key, meta]) => (
+                        <option key={key} value={key}>
+                          {meta.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* set password link (static) */}
+                  <div className="mt-2">
+                    <Link
+                      to={`/set-password?role=${encodeURIComponent(role)}`}
+                      className="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                    >
+                      Set Password (static)
+                    </Link>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -126,6 +248,7 @@ export default function SignInForm() {
                     Forgot password?
                   </Link>
                 </div>
+
                 <div>
                   <Button className="w-full" size="sm">
                     Sign in
@@ -136,7 +259,7 @@ export default function SignInForm() {
 
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Don&apos;t have an account? {""}
+                Don&apos;t have an account?{" "}
                 <Link
                   to="/signup"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"

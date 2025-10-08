@@ -16,14 +16,12 @@ export default function AuthLayout({
           <div className="relative flex items-center justify-center z-1">
             <GridShape />
             <div className="flex flex-col items-center max-w-xs">
-              <Link to="/" className="block mb-4">
-                <img
-                  width={231}
-                  height={48}
-                  src="/images/logo/xportus.png"
-                  alt="Logo"
-                />
+              <Link to="/" className="block mb-4" aria-label="XportUs — Home">
+                <span className="text-2xl font-extrabold tracking-tight text-white dark:text-white">
+                  XportUs
+                </span>
               </Link>
+
               <p className="text-center text-gray-400 dark:text-white/60">
                 Ship a real-world admin dashboard for export-import today—no
                 cost, high speed, and made to customize.
