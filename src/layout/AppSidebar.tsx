@@ -11,6 +11,10 @@ import {
   BoltIcon,
   DocsIcon,
   TimeIcon,
+  FileIcon,
+  GridIcon,
+  ImportIcon,
+  ExportIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
@@ -44,7 +48,7 @@ const roleDashboard: Record<Role, string> = {
   OPS_TEAM: "/dashboard",
   PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard",
   CUSTOMER_ORDER_CREATOR: "/dashboard",
-  END_CUSTOMER: "/dashboard",
+  END_CUSTOMER: "/user/dashboard",
 };
 
 /* ========== NAV MODEL ========== */
@@ -57,6 +61,36 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+  {
+    name: "Dashboard",
+    path: "/user/dashboard",
+    icon: <BoxCubeIcon />,
+  },
+  {
+    name: "Quote & Book",
+    path: "/quoterate/book",
+    icon: <GridIcon />,
+  },
+  {
+    name: "Export",
+    path: "/user/export",
+    icon: <ExportIcon />,
+  },
+  {
+    name: "Import",
+    path: "/user/import",
+    icon: <ImportIcon />,
+  },
+  {
+    name: "Finance",
+    path: "/user/finance",
+    icon: <FileIcon />,
+  },
+  {
+    name: "Settings",
+    path: "/user/settings",
+    icon: <FileIcon />,
+  },
   // --- Vendor Management ---
   {
     name: "Vendors",
@@ -359,7 +393,12 @@ const ACCESS_TABLE: AccessTable = {
   },
 
   END_CUSTOMER: {
-    "/dashboard": A("full"),
+    "/user/dashboard": A("full"),
+    "/quoterate/book": A("full"),
+    "/user/export": A("full"),
+    "/user/import": A("full"),
+    "/user/finance": A("full"),
+    "/user/settings": A("full"),
 
     // Vendor: all ❌
     "/vendor/vendors-approvals": A("none"),
@@ -375,13 +414,13 @@ const ACCESS_TABLE: AccessTable = {
     "/rates/compare": A("none"),
     "/rates/shipment-details": A("none"),
     "/rates/bookings": A("none"),
-    "/rates/book": A("none"),
+    // "/rates/book": A("none"),
 
     // Tracking (yes)
-    "/operations/tracking": A("full"),
+    "/operations/tracking": A("none"),
 
     // Notifications (yes)
-    "/notifications": A("full"),
+    "/notifications": A("none"),
 
     // Billing (all ❌)
     "/billing/invoices": A("none"),
@@ -391,7 +430,7 @@ const ACCESS_TABLE: AccessTable = {
 
     // CMS knowledge view ✅
     "/cms/articles": A("none"),
-    "/cms/knowledge": A("full"),
+    "/cms/knowledge": A("none"),
 
     // Analytics (no)
     "/analytics/user-activity": A("none"),

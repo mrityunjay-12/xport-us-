@@ -1,6 +1,6 @@
 // src/pages/pricing/PriceUploading.tsx
 import React, { useMemo, useState } from "react";
-import * as XLSX from "xlsx"; // <-- yarn add xlsx  (or npm i xlsx)
+import * as XLSX from "xlsx";
 
 const Section = ({
   title,
@@ -13,27 +13,36 @@ const Section = ({
     {children}
   </div>
 );
+
 const Label = ({ children }: React.PropsWithChildren) => (
   <label className="text-xs text-gray-500 dark:text-gray-400">{children}</label>
 );
-const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
+
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  className?: string;
+};
+const Input = (p: InputProps) => (
   <input
     {...p}
     className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
-      p.className || ""
-    }`}
-  />
-);
-const Select = (p: React.SelectHTMLAttributes<HTMLSelectElement>) => (
-  <select
-    {...p}
-    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
-      p.className || ""
+      p.className ?? ""
     }`}
   />
 );
 
-type GridRow = Record<string, any>;
+type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
+  className?: string;
+};
+const Select = (p: SelectProps) => (
+  <select
+    {...p}
+    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
+      p.className ?? ""
+    }`}
+  />
+);
+
+type GridRow = Record<string, unknown>;
 type ParsedBook = {
   fileName: string;
   sheets: { name: string; rows: GridRow[] }[];
@@ -44,66 +53,60 @@ export default function PriceUploading() {
   const [service, setService] = useState<"FCL" | "LCL" | "Air">("FCL");
   const [carrier, setCarrier] = useState("MSC");
   const [notes, setNotes] = useState("");
-
-  // parsed workbook (after selecting a CSV/XLSX)
   const [parsed, setParsed] = useState<ParsedBook | null>(null);
   const [activeSheet, setActiveSheet] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const activeRows = useMemo(() => {
+  const activeRows = useMemo<GridRow[]>(() => {
     if (!parsed || !activeSheet) return [];
-    return parsed.sheets.find((s) => s.name === activeSheet)?.rows ?? [];
+    const sheet = parsed.sheets.find((s) => s.name === activeSheet);
+    return sheet?.rows ?? [];
   }, [parsed, activeSheet]);
 
-  const headers = useMemo(() => {
+  const headers = useMemo<string[]>(() => {
     if (!activeRows.length) return [];
-    return Array.from(
-      activeRows.reduce((set, row) => {
-        Object.keys(row || {}).forEach((k) => set.add(k));
-        return set;
-      }, new Set<string>())
-    );
+    const set = new Set<string>();
+    for (const row of activeRows) {
+      Object.keys(row || {}).forEach((k) => set.add(k));
+    }
+    return Array.from(set);
   }, [activeRows]);
 
   const handleFileChange = async (f: File | null) => {
-    setFile(f);
-    setParsed(null);
-    setActiveSheet(null);
-    if (!f) return;
+    try {
+      setError(null);
+      setFile(f);
+      setParsed(null);
+      setActiveSheet(null);
+      if (!f) return;
 
-    const buf = await f.arrayBuffer();
+      const buf = await f.arrayBuffer();
+      const lower = f.name.toLowerCase();
 
-    if (f.name.endsWith(".csv")) {
-      // Parse CSV as a single-sheet workbook
-      const text = new TextDecoder().decode(new Uint8Array(buf));
-      const ws = XLSX.utils.aoa_to_sheet(
-        text
-          .split(/\r?\n/)
-          .filter(Boolean)
-          .map((line) => line.split(","))
-      );
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: "" }) as GridRow[];
-      const book: ParsedBook = {
-        fileName: f.name,
-        sheets: [{ name: f.name.replace(/\.csv$/i, ""), rows }],
-      };
-      setParsed(book);
-      setActiveSheet(book.sheets[0].name);
-    } else {
-      // Parse Excel
-      const wb = XLSX.read(buf, { type: "array" });
+      // Use XLSX.read for BOTH CSV and Excel (handles quotes/commas correctly)
+      const wb = lower.endsWith(".csv")
+        ? XLSX.read(new Uint8Array(buf), { type: "array" })
+        : XLSX.read(buf, { type: "array" });
+
       const sheets = wb.SheetNames.map((name) => {
         const ws = wb.Sheets[name];
+        // defval to keep empty cells as empty strings
         const rows = XLSX.utils.sheet_to_json(ws, { defval: "" }) as GridRow[];
         return { name, rows };
       });
+
       const book: ParsedBook = { fileName: f.name, sheets };
       setParsed(book);
       setActiveSheet(sheets[0]?.name ?? null);
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.message || "Failed to parse file. Please check the format.");
     }
   };
 
   const upload = (e: React.FormEvent) => {
     e.preventDefault();
+    // TODO: replace alert with real API call
     alert(
       `Uploaded ${
         file?.name || "(no file)"
@@ -119,7 +122,7 @@ export default function PriceUploading() {
     const rows = parsed.sheets.find((s) => s.name === activeSheet)?.rows ?? [];
     const ws = XLSX.utils.json_to_sheet(rows);
     const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -131,10 +134,9 @@ export default function PriceUploading() {
   };
 
   const downloadTemplate = () => {
-    // lightweight template headers; adjust as needed
     const template = [
       {
-        origin: "INNSA", // UN/LOCODE
+        origin: "INNSA",
         destination: "DEHAM",
         container: "20GP",
         base: 500,
@@ -175,6 +177,13 @@ export default function PriceUploading() {
         </div>
       </div>
 
+      {/* Error banner */}
+      {error && (
+        <div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800/60 dark:bg-red-900/20 dark:text-red-200">
+          {error}
+        </div>
+      )}
+
       {/* Form + Imported Sheets */}
       <form
         onSubmit={upload}
@@ -187,7 +196,9 @@ export default function PriceUploading() {
               <Label>Service</Label>
               <Select
                 value={service}
-                onChange={(e) => setService(e.target.value as any)}
+                onChange={(e) =>
+                  setService(e.target.value as "FCL" | "LCL" | "Air")
+                }
               >
                 <option>FCL</option>
                 <option>LCL</option>
@@ -212,7 +223,7 @@ export default function PriceUploading() {
               <Input
                 type="file"
                 accept=".csv,.xls,.xlsx"
-                onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+                onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
               />
               <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
                 CSV/XLSX with origin, destination, container, base, surcharges…
@@ -287,8 +298,7 @@ export default function PriceUploading() {
                     key={s.name}
                     onClick={() => setActiveSheet(s.name)}
                     type="button"
-                    className={`rounded-full px-3 py-1 text-xs font-medium border transition
-                    ${
+                    className={`rounded-full px-3 py-1 text-xs font-medium border transition ${
                       isActive
                         ? "bg-sky-600 text-white border-sky-600"
                         : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
@@ -305,41 +315,48 @@ export default function PriceUploading() {
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-white/[0.04]">
                   <tr>
-                    {headers.map((h) => (
-                      <th
-                        key={h}
-                        className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap"
-                      >
-                        {h}
+                    {headers.length ? (
+                      headers.map((h) => (
+                        <th
+                          key={h}
+                          className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))
+                    ) : (
+                      <th className="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-200">
+                        (No Columns)
                       </th>
-                    ))}
+                    )}
                   </tr>
                 </thead>
                 <tbody>
-                  {activeRows.slice(0, 100).map((row, idx) => (
-                    <tr
-                      key={idx}
-                      className={
-                        idx % 2
-                          ? "bg-white dark:bg-transparent"
-                          : "bg-gray-50/70 dark:bg-white/[0.02]"
-                      }
-                    >
-                      {headers.map((h) => (
-                        <td
-                          key={h}
-                          className="px-3 py-2 text-gray-800 dark:text-gray-100 whitespace-nowrap"
-                        >
-                          {String(row?.[h] ?? "")}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                  {!activeRows.length && (
+                  {activeRows.length ? (
+                    activeRows.slice(0, 100).map((row, idx) => (
+                      <tr
+                        key={idx}
+                        className={
+                          idx % 2
+                            ? "bg-white dark:bg-transparent"
+                            : "bg-gray-50/70 dark:bg-white/[0.02]"
+                        }
+                      >
+                        {headers.map((h) => (
+                          <td
+                            key={h}
+                            className="px-3 py-2 text-gray-800 dark:text-gray-100 whitespace-nowrap"
+                          >
+                            {String((row as any)?.[h] ?? "")}
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td
                         className="px-3 py-6 text-gray-500 dark:text-gray-400"
-                        colSpan={headers.length || 1}
+                        colSpan={Math.max(headers.length, 1)}
                       >
                         No rows found in this sheet.
                       </td>

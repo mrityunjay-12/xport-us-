@@ -43,6 +43,7 @@ import Subscription from "./pages/Billing/Subscription";
 import ManageArticles from "./pages/CmsManagement/ManageArticles";
 import Knowledge from "./pages/CmsManagement/Knowledge";
 import Notifications from "./pages/Notification/Notifications";
+import UserDashboard from "./pages/Dashboard/UserDashboard";
 
 export default function App() {
   return (
@@ -104,6 +105,7 @@ export default function App() {
               path="/operations/tracking"
               element={<ShipmentTrackingMilestones />}
             />
+            <Route path="/user/dashboard" element={<UserDashboard />} />
 
             {/* Bills &  Payment*/}
             <Route path="/billing/invoices" element={<Invoices />} />
