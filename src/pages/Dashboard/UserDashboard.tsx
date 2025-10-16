@@ -366,7 +366,6 @@ export default function UserDashboard() {
             </div>
           </div>
         </div>
-
         {/* KPI Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card
@@ -390,7 +389,6 @@ export default function UserDashboard() {
             sub="Detected by title"
           />
         </div>
-
         {/* Tracking Search */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
@@ -403,7 +401,6 @@ export default function UserDashboard() {
             </button>
           </div>
         </div>
-
         {/* Highlights */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card
@@ -427,7 +424,6 @@ export default function UserDashboard() {
             sub="Available"
           />
         </div>
-
         {/* Tasks Table */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="text-sm font-semibold text-gray-800 dark:text-white/90">
@@ -513,7 +509,6 @@ export default function UserDashboard() {
             </button>
           </div>
         </div>
-
         {/* Recent Activity */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="text-sm font-semibold text-gray-800 dark:text-white/90">

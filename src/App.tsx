@@ -44,6 +44,11 @@ import ManageArticles from "./pages/CmsManagement/ManageArticles";
 import Knowledge from "./pages/CmsManagement/Knowledge";
 import Notifications from "./pages/Notification/Notifications";
 import UserDashboard from "./pages/Dashboard/UserDashboard";
+import QuoteAndBook from "./pages/Quote/QuoteAndBook";
+import ExportPage from "./pages/Export/ExportPage";
+import ImportPage from "./pages/Import/ImportPage";
+import FinancePage from "./pages/Finance/FinancePage";
+import UserSettingsPage from "./pages/Setting/UserSettingsPage";
 
 export default function App() {
   return (
@@ -123,6 +128,11 @@ export default function App() {
 
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
+            <Route path="/quoterate/book" element={<QuoteAndBook />} />
+            <Route path="/user/export" element={<ExportPage />} />
+            <Route path="/user/import" element={<ImportPage />} />
+            <Route path="/user/finance" element={<FinancePage />} />
+            <Route path="/user/settings" element={<UserSettingsPage />} />
 
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
