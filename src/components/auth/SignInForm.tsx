@@ -10,7 +10,6 @@ type RoleOption =
   | "SUPER_ADMIN"
   | "OPS_TEAM"
   | "PRICING_MANAGER_VENDOR_SHIPLINE"
-  | "CUSTOMER_ORDER_CREATOR"
   | "END_CUSTOMER";
 
 const ROLE_DEMOS: Record<
@@ -74,7 +73,6 @@ export default function SignInForm() {
       SUPER_ADMIN: "/dashboard/",
       OPS_TEAM: "/dashboard/",
       PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard/",
-      CUSTOMER_ORDER_CREATOR: "/dashboard/",
       END_CUSTOMER: "/dashboard/",
     };
 
