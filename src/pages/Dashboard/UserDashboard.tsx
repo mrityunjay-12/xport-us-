@@ -147,7 +147,7 @@ const DEMO_TASKS: Task[] = [
 ];
 
 /* ---------- Sidebar ---------- */
-const Sidebar = () => (
+export const Sidebar = () => (
   <aside className="w-full sm:w-60 shrink-0">
     <div className="sticky top-4 rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">

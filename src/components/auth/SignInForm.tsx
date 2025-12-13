@@ -32,11 +32,11 @@ const ROLE_DEMOS: Record<
     password: "Pricing@123", // static
     label: "Pricing Manager / Vendor / Shipline",
   },
-  CUSTOMER_ORDER_CREATOR: {
-    email: "customer@demo.app",
-    password: "Customer@123", // static
-    label: "Customer (Order Creator)",
-  },
+  // CUSTOMER_ORDER_CREATOR: {
+  //   email: "customer@demo.app",
+  //   password: "Customer@123", // static
+  //   label: "Customer (Order Creator)",
+  // },
   END_CUSTOMER: {
     email: "end@demo.app",
     password: "End@123", // static

@@ -1,5 +1,4 @@
 // src/pages/pricing/PricingDashboard.tsx
-import React from "react";
 
 const Card = ({
   title,
