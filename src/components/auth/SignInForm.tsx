@@ -10,6 +10,7 @@ type RoleOption =
   | "SUPER_ADMIN"
   | "OPS_TEAM"
   | "PRICING_MANAGER_VENDOR_SHIPLINE"
+  | "SALES_TEAM"
   | "END_CUSTOMER";
 
 const ROLE_DEMOS: Record<
@@ -36,6 +37,11 @@ const ROLE_DEMOS: Record<
   //   password: "Customer@123", // static
   //   label: "Customer (Order Creator)",
   // },
+  SALES_TEAM: {
+    email: "sales@demo.app",
+    password: "Sales@123", // static
+    label: "Sales Team",
+  },
   END_CUSTOMER: {
     email: "end@demo.app",
     password: "End@123", // static
@@ -71,9 +77,10 @@ export default function SignInForm() {
     // Role-based routes
     const roleRoutes: Record<RoleOption, string> = {
       SUPER_ADMIN: "/dashboard/",
-      OPS_TEAM: "/dashboard/",
+      OPS_TEAM: "/ops/dashboard/",
       PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard/",
-      END_CUSTOMER: "/dashboard/",
+      SALES_TEAM: "/sales/dashboard/",
+      END_CUSTOMER: "/user/dashboard/",
     };
 
     navigate(roleRoutes[role]);

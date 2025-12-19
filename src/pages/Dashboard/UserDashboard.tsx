@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import PageMeta from "../../components/common/PageMeta";
 
 /* ---------- Small UI primitives ---------- */
 const Card = ({
@@ -31,7 +32,7 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
 const Input = (p: InputProps) => (
   <input
     {...p}
-    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
+    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
       p.className ?? ""
     }`}
   />
@@ -43,7 +44,7 @@ type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
 const Select = (p: SelectProps) => (
   <select
     {...p}
-    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
+    className={`mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 ${
       p.className ?? ""
     }`}
   />
@@ -228,6 +229,10 @@ export default function UserDashboard() {
 
   return (
     <div className="grid gap-6 ">
+      <PageMeta
+        title="Xport Us - Customer Dashboard"
+        description="Highlights, filters, tracking and recent activity tailored for the user."
+      />
       {/* <Sidebar /> */}
 
       <div className="space-y-8">

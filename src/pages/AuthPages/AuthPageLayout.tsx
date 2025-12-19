@@ -17,9 +17,11 @@ export default function AuthLayout({
             <GridShape />
             <div className="flex flex-col items-center max-w-xs">
               <Link to="/" className="block mb-4" aria-label="XportUs — Home">
-                <span className="text-2xl font-extrabold tracking-tight text-white dark:text-white">
-                  XportUs
-                </span>
+                <img
+                  src="/images/logo/dark-logo.png"
+                  alt="XportUs"
+                  className="h-18 w-70"
+                />
               </Link>
 
               <p className="text-center text-gray-400 dark:text-white/60">

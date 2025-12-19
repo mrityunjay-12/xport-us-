@@ -89,10 +89,16 @@ const AppHeader: React.FC = () => {
             aria-label="Xport Us"
             title="Xport Us"
           >
-            <span className="inline-flex items-center gap-1 select-none text-xl font-bold tracking-tight leading-none">
-              <span className="text-sky-600">Xport</span>
-              <span className="text-gray-900 dark:text-white">Us</span>
-            </span>
+            <img
+              src="/images/logo/white-logo.png"
+              alt="Xport Us"
+              className="h-8 w-auto dark:hidden"
+            />
+            <img
+              src="/images/logo/dark-logo.png"
+              alt="Xport Us"
+              className="h-8 w-auto hidden dark:block"
+            />
           </Link>
 
           <button

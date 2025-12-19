@@ -44,11 +44,14 @@ import ManageArticles from "./pages/CmsManagement/ManageArticles";
 import Knowledge from "./pages/CmsManagement/Knowledge";
 import Notifications from "./pages/Notification/Notifications";
 import UserDashboard from "./pages/Dashboard/UserDashboard";
+import SalesDashboard from "./pages/Dashboard/SalesDashboard";
+import OpsDashboard from "./pages/Dashboard/OpsDashboard";
 import QuoteAndBook from "./pages/Quote/QuoteAndBook";
 import ExportPage from "./pages/Export/ExportPage";
 import ImportPage from "./pages/Import/ImportPage";
 import FinancePage from "./pages/Finance/FinancePage";
 import UserSettingsPage from "./pages/Setting/UserSettingsPage";
+import ExceptionResolutionCenter from "./pages/Operations/ExceptionResolutionCenter";
 
 export default function App() {
   return (
@@ -110,7 +113,10 @@ export default function App() {
               path="/operations/tracking"
               element={<ShipmentTrackingMilestones />}
             />
+            <Route path="/operations/exceptions" element={<ExceptionResolutionCenter/>} />
             <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/sales/dashboard" element={<SalesDashboard />} />
+            <Route path="/ops/dashboard" element={<OpsDashboard />} />
 
             {/* Bills &  Payment*/}
             <Route path="/billing/invoices" element={<Invoices />} />

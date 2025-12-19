@@ -25,6 +25,7 @@ export type Role =
   | "OPS_TEAM"
   | "PRICING_MANAGER_VENDOR_SHIPLINE"
   | "CUSTOMER_ORDER_CREATOR"
+  | "SALES_TEAM"
   | "END_CUSTOMER";
 
 /** Read role from SignInForm (localStorage), fallback to SUPER_ADMIN */
@@ -37,6 +38,7 @@ const readRole = (): Role => {
       "OPS_TEAM",
       "PRICING_MANAGER_VENDOR_SHIPLINE",
       "CUSTOMER_ORDER_CREATOR",
+      "SALES_TEAM",
       "END_CUSTOMER",
     ][0] as Role)
   );
@@ -45,9 +47,10 @@ const readRole = (): Role => {
 /* Per-role dashboard route (matches your SignInForm) */
 const roleDashboard: Record<Role, string> = {
   SUPER_ADMIN: "/dashboard",
-  OPS_TEAM: "/dashboard",
+  OPS_TEAM: "/ops/dashboard",
   PRICING_MANAGER_VENDOR_SHIPLINE: "/dashboard",
   CUSTOMER_ORDER_CREATOR: "/dashboard",
+  SALES_TEAM: "/sales/dashboard",
   END_CUSTOMER: "/user/dashboard",
 };
 
@@ -64,6 +67,16 @@ const navItems: NavItem[] = [
   {
     name: "Dashboard",
     path: "/user/dashboard",
+    icon: <BoxCubeIcon />,
+  },
+  {
+    name: "Sales Dashboard",
+    path: "/sales/dashboard",
+    icon: <BoxCubeIcon />,
+  },
+  {
+    name: "Ops Dashboard",
+    path: "/ops/dashboard",
     icon: <BoxCubeIcon />,
   },
   {
@@ -139,6 +152,7 @@ const navItems: NavItem[] = [
     icon: <TimeIcon />,
     subItems: [
       { name: "Shipment Tracking & Milestones", path: "/operations/tracking" },
+      { name: "Shipment Exceptions", path: "/operations/exceptions" },
     ],
   },
 
@@ -233,7 +247,7 @@ const ACCESS_TABLE: AccessTable = {
 
     // Tracking
     "/operations/tracking": A("full"),
-
+    "/operations/exceptions": A("full"),
     // Notifications
     "/notifications": A("full"),
 
@@ -258,12 +272,13 @@ const ACCESS_TABLE: AccessTable = {
   },
 
   OPS_TEAM: {
-    "/dashboard": A("full"),
+    "/ops/dashboard": A("full"),
+    "/dashboard": A("none"),
 
     // Vendor/Prices/Freight (no)
-    "/vendor/vendors-approvals": A("full"),
-    "/vendor/vendor-orders": A("full"),
-    "/vendor/shipments/execution": A("full"),
+    "/vendor/vendors-approvals": A("none"),
+    "/vendor/vendor-orders": A("none"),
+    "/vendor/shipments/execution": A("none"),
     "/pricing/upload": A("none"),
     "/pricing/api": A("none"),
     "/pricing/compare": A("none"),
@@ -276,7 +291,7 @@ const ACCESS_TABLE: AccessTable = {
 
     // Tracking (yes)
     "/operations/tracking": A("full"),
-
+    "/operations/exceptions": A("full"),
     // Notifications (yes per sheet)
     "/notifications": A("full"),
 
@@ -437,6 +452,45 @@ const ACCESS_TABLE: AccessTable = {
     "/analytics/revenue": A("none"),
     "/analytics/booking-trends": A("none"),
     "/analytics/vendor-performance": A("none"),
+
+    "/signin": A("none"),
+    "/signup": A("none"),
+  },
+
+  SALES_TEAM: {
+    "/sales/dashboard": A("full"),
+    "/dashboard": A("none"),
+
+    "/vendor/vendors-approvals": A("view"),
+    "/vendor/vendor-orders": A("view"),
+    "/vendor/shipments/execution": A("view"),
+
+    "/pricing/upload": A("view"),
+    "/pricing/compare": A("full"),
+    "/pricing/selection": A("full"),
+    "/pricing/dashboard": A("full"),
+
+    "/rates/compare": A("full"),
+    "/rates/shipment-details": A("full"),
+    "/rates/bookings": A("full"),
+    "/rates/book": A("full"),
+
+    "/operations/tracking": A("view"),
+
+    "/notifications": A("full"),
+
+    "/billing/invoices": A("view"),
+    "/billing/payments": A("view"),
+    "/billing/disputes": A("raise"),
+    "/billing/subscription": A("none"),
+
+    "/cms/articles": A("none"),
+    "/cms/knowledge": A("full"),
+
+    "/analytics/revenue": A("full"),
+    "/analytics/booking-trends": A("full"),
+    "/analytics/user-activity": A("none"),
+    "/analytics/vendor-performance": A("view"),
 
     "/signin": A("none"),
     "/signup": A("none"),
@@ -758,15 +812,24 @@ const AppSidebar: React.FC = () => {
       >
         <Link to={roleDashboard[role]} aria-label="Xport Us" title="Xport Us">
           {isExpanded || isHovered || isMobileOpen ? (
-            <span className="inline-flex items-center gap-1 text-2xl lg:text-3xl font-bold tracking-tight leading-none ml-10">
-              <span className="text-sky-600">Xport</span>
-              <span className="text-gray-900 dark:text-gray-100">Us</span>
-            </span>
+            <div className="ml-1">
+              <img
+                src="/images/logo/white-logo.png"
+                alt="Xport Us"
+                className="h-14 w-auto dark:hidden"
+              />
+              <img
+                src="/images/logo/dark-logo.png"
+                alt="Xport Us"
+                className="h-14 w-auto hidden dark:block"
+              />
+            </div>
           ) : (
-            <span className="inline-flex items-center text-lg font-extrabold tracking-tight leading-none">
-              <span className="text-sky-600">X</span>
-              <span className="text-gray-900 dark:text-gray-100">U</span>
-            </span>
+            <img
+              src="/images/logo/logo-icon.svg"
+              alt="Xport Us"
+              className="h-10 w-auto"
+            />
           )}
         </Link>
       </div>
