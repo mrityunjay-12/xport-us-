@@ -276,9 +276,9 @@ const ACCESS_TABLE: AccessTable = {
     "/dashboard": A("none"),
 
     // Vendor/Prices/Freight (no)
-    "/vendor/vendors-approvals": A("none"),
-    "/vendor/vendor-orders": A("none"),
-    "/vendor/shipments/execution": A("none"),
+    "/vendor/vendors-approvals": A("full"),
+    "/vendor/vendor-orders": A("full"),
+    "/vendor/shipments/execution": A("full"),
     "/pricing/upload": A("none"),
     "/pricing/api": A("none"),
     "/pricing/compare": A("none"),
